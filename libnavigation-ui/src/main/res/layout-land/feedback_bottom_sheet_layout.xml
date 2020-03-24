@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -10,40 +9,38 @@
         android:id="@+id/reportFeedback"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="@dimen/report_feedback_padding_16"
-        android:paddingBottom="@dimen/report_feedback_padding_16"
-        android:paddingEnd="@dimen/report_feedback_padding_24"
         android:paddingStart="@dimen/report_feedback_padding_24"
-        android:textStyle="bold"
-        android:textSize="24sp"
-        android:textColor="?attr/navigationViewPrimaryText"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/feedbackItems"
+        android:paddingTop="@dimen/report_feedback_padding_16"
+        android:paddingEnd="@dimen/report_feedback_padding_24"
+        android:paddingBottom="@dimen/report_feedback_padding_16"
         android:text="@string/report_feedback"
-        />
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/feedbackItems"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/feedbackItems"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/feedback_item_margin"
         android:layout_marginStart="@dimen/feedback_item_margin"
+        android:layout_marginEnd="@dimen/feedback_item_margin"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/reportFeedback"/>
+        app:layout_constraintTop_toBottomOf="@id/reportFeedback" />
 
     <ProgressBar
         android:id="@+id/feedbackProgress"
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-        android:progressDrawable="@drawable/feedback_progress_drawable"
         android:layout_width="0dp"
         android:layout_height="8dp"
-        android:progress="5000"
         android:max="5000"
-        app:layout_constraintTop_toBottomOf="@id/feedbackItems"
+        android:progress="5000"
+        android:progressDrawable="@drawable/feedback_progress_drawable"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/feedbackItems" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,7 +5,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?attr/navigationViewListBackground"
     android:elevation="2dp">
 
     <com.mapbox.navigation.ui.instruction.maneuver.ManeuverView
@@ -17,8 +16,8 @@
         app:layout_constraintEnd_toStartOf="@+id/guideline"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:maneuverViewPrimaryColor="?attr/navigationViewBannerManeuverPrimary"
-        app:maneuverViewSecondaryColor="?attr/navigationViewBannerManeuverSecondary"/>
+        app:maneuverViewPrimaryColor="@color/mapbox_instruction_maneuver_view_primary"
+        app:maneuverViewSecondaryColor="@color/mapbox_instruction_maneuver_view_secondary"/>
 
     <TextView
         android:id="@+id/subStepText"
@@ -29,7 +28,6 @@
         android:ellipsize="end"
         android:includeFontPadding="false"
         android:maxLines="1"
-        android:textColor="?attr/navigationViewBannerSecondaryText"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
