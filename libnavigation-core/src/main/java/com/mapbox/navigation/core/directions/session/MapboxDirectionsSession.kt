@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.directions.session
 
+import android.util.Log
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.extensions.ifNonNull
@@ -12,6 +13,7 @@ class MapboxDirectionsSession(
     private val router: Router
 ) : DirectionsSession {
 
+    private val TAG = "MAPBOX_DIRECTIONSESSION"
     private val routesObservers = CopyOnWriteArrayList<RoutesObserver>()
     private var routeOptions: RouteOptions? = null
 
@@ -42,12 +44,11 @@ class MapboxDirectionsSession(
         routeOptions: RouteOptions,
         routesRequestCallback: RoutesRequestCallback?
     ) {
-        routes = emptyList()
         router.getRoute(routeOptions, object : Router.Callback {
             override fun onResponse(routes: List<DirectionsRoute>) {
                 this@MapboxDirectionsSession.routes = routes
                 routesRequestCallback?.onRoutesReady(routes)
-                // todo log in the future
+                Log.d(TAG, "requestRoutes router returned routes: ${routes.size}")
             }
 
             override fun onFailure(throwable: Throwable) {
