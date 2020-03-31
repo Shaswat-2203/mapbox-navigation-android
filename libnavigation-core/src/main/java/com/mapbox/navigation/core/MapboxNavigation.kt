@@ -449,6 +449,8 @@ constructor(
         fasterRouteController.stop()
     }
 
+    internal fun getNavigationSession() = navigationSession
+
     private fun createInternalRoutesObserver() = object : RoutesObserver {
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {
             if (routes.isNotEmpty()) {
