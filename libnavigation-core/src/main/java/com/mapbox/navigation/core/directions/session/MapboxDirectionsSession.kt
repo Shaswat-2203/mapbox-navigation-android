@@ -1,14 +1,10 @@
 package com.mapbox.navigation.core.directions.session
 
-import android.util.Log.d
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.extensions.ifNonNull
-import com.mapbox.navigation.base.logger.model.Message
-import com.mapbox.navigation.base.logger.model.Tag
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.logger.MapboxLogger
 import java.util.concurrent.CopyOnWriteArrayList
 
 // todo make internal
@@ -51,17 +47,14 @@ class MapboxDirectionsSession(
             override fun onResponse(routes: List<DirectionsRoute>) {
                 this@MapboxDirectionsSession.routes = routes
                 routesRequestCallback?.onRoutesReady(routes)
-                MapboxLogger.d(Tag(TAG), Message("requestRoutes router returned ${routes.size} route(s)"))
             }
 
             override fun onFailure(throwable: Throwable) {
                 routesRequestCallback?.onRoutesRequestFailure(throwable, routeOptions)
-                MapboxLogger.d(Tag(TAG), Message("getRoute() call failed with: ${throwable.localizedMessage}"))
             }
 
             override fun onCanceled() {
                 routesRequestCallback?.onRoutesRequestCanceled(routeOptions)
-                MapboxLogger.d(Tag(TAG), Message("gerRoute() was canceled"))
             }
         })
     }
