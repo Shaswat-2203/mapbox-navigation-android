@@ -72,7 +72,7 @@ private data class DynamicallyUpdatedRouteValues(
     var sdkId: String = "none",
     val sessionStarted: AtomicBoolean = AtomicBoolean(false),
     val originalRoute: AtomicReference<DirectionsRoute?> = AtomicReference(null),
-    val isFreeDrive: AtomicBoolean = AtomicBoolean(true) // Default is IDLE, which is treated same as FREE_DRIVE
+    val isActiveGuidance: AtomicBoolean = AtomicBoolean(true) // Default is IDLE, which is treated same as FREE_DRIVE
 ) {
     fun reset() {
         distanceRemaining.set(0)
@@ -87,7 +87,7 @@ private data class DynamicallyUpdatedRouteValues(
         tripIdentifier.set(TelemetryUtils.obtainUniversalUniqueIdentifier())
         sessionArrivalTime.set(null)
         sessionStarted.set(false)
-        isFreeDrive.set(true)
+        isActiveGuidance.set(true)
     }
 }
 
@@ -152,12 +152,12 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         override fun onNavigationSessionStateChanged(navigationSession: NavigationSession.State) {
             when (navigationSession) {
                 NavigationSession.State.FREE_DRIVE -> {
-                    dynamicValues.isFreeDrive.set(true)
+                    dynamicValues.isActiveGuidance.set(false)
                     Log.d(TAG, "Navigation state is $navigationSession")
                     switchToFreeDriveBehavior()
                 }
                 NavigationSession.State.ACTIVE_GUIDANCE -> {
-                    dynamicValues.isFreeDrive.set(false)
+                    dynamicValues.isActiveGuidance.set(true)
                     Log.d(TAG, "Navigation state is $navigationSession")
                     switchToGuidedNavigationBehavior()
                 }
@@ -180,7 +180,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         when (isTelemetryAvailable()) {
             false -> {
                 Log.i(TAG, "Route not selected. Telemetry event not sent. Caused by:Navigation " +
-                        "State: ${dynamicValues.isFreeDrive.get()} Route exists: ${dynamicValues.originalRoute.get() != null}")
+                        "State: ${dynamicValues.isActiveGuidance.get()} Route exists: ${dynamicValues.originalRoute.get() != null}")
                 false
             }
             true -> {
@@ -243,7 +243,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
      * it is a free guided session otherwise
      */
     private fun isTelemetryAvailable(): Boolean {
-        return dynamicValues.originalRoute.get() != null && !dynamicValues.isFreeDrive.get()
+        return dynamicValues.originalRoute.get() != null && dynamicValues.isActiveGuidance.get()
     }
 
     /**
@@ -344,7 +344,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         { context, token, mapboxNavigation, metricsReporter, name, jobControl, options, userAgent ->
             telemetryThreadControl = jobControl
             weakMapboxNavigation = WeakReference(mapboxNavigation)
-            weakMapboxNavigation.get()?.getNavigationSession()?.registerNavigationSessionStateObserver(navigationSessionObserver)
+            weakMapboxNavigation.get()?.registerNavigationSessionObserver(navigationSessionObserver)
             registerForNotification(mapboxNavigation)
             monitorOffRouteEvents()
             populateOriginalRouteConditionally()
@@ -635,7 +635,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         mapboxNavigation.unregisterLocationObserver(callbackDispatcher)
         mapboxNavigation.unregisterRoutesObserver(callbackDispatcher)
         mapboxNavigation.unregisterOffRouteObserver(callbackDispatcher)
-        mapboxNavigation.getNavigationSession().unregisterNavigationSessionStateObserver(navigationSessionObserver)
+        mapboxNavigation.unregisterNavigationSessionObserver(navigationSessionObserver)
         Log.d(TAG, "resetting Telemetry initialization")
         MapboxMetricsReporter.disable() // Disable telemetry unconditionally
         initializer = preInitializePredicate

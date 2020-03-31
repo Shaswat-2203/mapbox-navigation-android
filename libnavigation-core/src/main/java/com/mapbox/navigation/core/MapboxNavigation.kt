@@ -441,6 +441,19 @@ constructor(
         tripSession.unregisterStateObserver(tripSessionStateObserver)
     }
 
+    /**
+     * Register a [NavigationSessionStateObserver] to be notified of the various Session states. Not publicly available
+     */
+    internal fun registerNavigationSessionObserver(navigationSessionStateObserver: NavigationSessionStateObserver) {
+        navigationSession.registerNavigationSessionStateObserver(navigationSessionStateObserver)
+    }
+
+    /**
+     * Unregisters a [NavigationSessionStateObserver]. Not publicly available
+     */
+    internal fun unregisterNavigationSessionObserver(navigationSessionStateObserver: NavigationSessionStateObserver) {
+        navigationSession.unregisterNavigationSessionStateObserver(navigationSessionStateObserver)
+    }
     fun attachFasterRouteObserver(fasterRouteObserver: FasterRouteObserver) {
         fasterRouteController.attach(fasterRouteObserver)
     }
@@ -448,8 +461,6 @@ constructor(
     fun detachFasterRouteObserver() {
         fasterRouteController.stop()
     }
-
-    internal fun getNavigationSession() = navigationSession
 
     private fun createInternalRoutesObserver() = object : RoutesObserver {
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {

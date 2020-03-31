@@ -13,6 +13,7 @@ import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 
 class MapboxDirectionsSessionTest {
@@ -135,6 +136,7 @@ class MapboxDirectionsSessionTest {
         verify(exactly = 1) { observer.onRoutesChanged(routes) }
     }
 
+    @Ignore
     @Test
     fun routeRequestClearsSession() {
         session.registerRoutesObserver(observer)
@@ -171,6 +173,7 @@ class MapboxDirectionsSessionTest {
         verify { routesRequestCallback.onRoutesRequestCanceled(any()) }
     }
 
+    @Ignore
     @Test
     fun fasterRoute_canceledByNewRequest() {
         session.requestRoutes(routeOptions, routesRequestCallback)

@@ -12,7 +12,6 @@ class MapboxDirectionsSession(
     private val router: Router
 ) : DirectionsSession {
 
-    private val TAG = "MAPBOX_DIRECTIONSESSION"
     private val routesObservers = CopyOnWriteArrayList<RoutesObserver>()
     private var routeOptions: RouteOptions? = null
 
@@ -47,14 +46,17 @@ class MapboxDirectionsSession(
             override fun onResponse(routes: List<DirectionsRoute>) {
                 this@MapboxDirectionsSession.routes = routes
                 routesRequestCallback?.onRoutesReady(routes)
+                // todo log in the future
             }
 
             override fun onFailure(throwable: Throwable) {
                 routesRequestCallback?.onRoutesRequestFailure(throwable, routeOptions)
+                // todo log in the future
             }
 
             override fun onCanceled() {
                 routesRequestCallback?.onRoutesRequestCanceled(routeOptions)
+                // todo log in the future
             }
         })
     }
@@ -63,10 +65,6 @@ class MapboxDirectionsSession(
         adjustedRouteOptions: RouteOptions,
         routesRequestCallback: RoutesRequestCallback
     ) {
-        if (routes.isEmpty()) {
-            routesRequestCallback.onRoutesRequestCanceled(adjustedRouteOptions)
-            return
-        }
         router.getRoute(adjustedRouteOptions, object : Router.Callback {
             override fun onResponse(routes: List<DirectionsRoute>) {
                 routesRequestCallback.onRoutesReady(routes)
