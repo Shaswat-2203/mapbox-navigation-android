@@ -54,7 +54,6 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     private var mapboxNavigation: MapboxNavigation? = null
     private var navigationMapboxMap: NavigationMapboxMap? = null
     private var mapInstanceState: NavigationMapboxMapInstanceState? = null
-    private var locationComponent: LocationComponent? = null
 
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,13 +81,13 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(mapboxMap: MapboxMap) {
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
-            initLocationComponent(style, mapboxMap)
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap).also {
-                it.addProgressChangeListener(mapboxNavigation!!)
-                mapInstanceState?.let { state ->
-                    it.restoreFrom(state)
-                }
+            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap)
+            mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
+            navigationMapboxMap?.initializeLocationComponent()
+            mapInstanceState?.let { state ->
+                navigationMapboxMap?.restoreFrom(state)
             }
+            initLocationEngine()
         }
         mapboxMap.addOnMapLongClickListener { latLng ->
             mapboxMap.locationComponent.lastKnownLocation?.let { originLocation ->
@@ -103,24 +102,6 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                 )
             }
             true
-        }
-        locationComponent = mapboxMap.locationComponent
-    }
-
-    @SuppressLint("RestrictedApi")
-    fun initLocationComponent(loadedMapStyle: Style, mapboxMap: MapboxMap) {
-        mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
-        mapboxMap.locationComponent.let { locationComponent ->
-            val locationComponentActivationOptions =
-                LocationComponentActivationOptions.builder(this, loadedMapStyle)
-                    .build()
-
-            locationComponent.activateLocationComponent(locationComponentActivationOptions)
-            locationComponent.isLocationComponentEnabled = true
-            locationComponent.cameraMode = CameraMode.TRACKING
-            locationComponent.renderMode = RenderMode.COMPASS
-
-            initLocationEngine()
         }
     }
 
@@ -164,9 +145,9 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     @SuppressLint("MissingPermission")
     fun initListeners() {
         startNavigation.setOnClickListener {
+            navigationMapboxMap?.enterNavigationMode()
+            navigationMapboxMap?.addProgressChangeListener(mapboxNavigation!!)
             if (mapboxNavigation?.getRoutes()?.isNotEmpty() == true) {
-                navigationMapboxMap?.updateLocationLayerRenderMode(RenderMode.GPS)
-                navigationMapboxMap?.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
                 navigationMapboxMap?.startCamera(mapboxNavigation?.getRoutes()!![0])
             }
             mapboxNavigation?.startTripSession()
@@ -246,9 +227,9 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
             keyPoints: List<Location>
         ) {
             if (keyPoints.isNotEmpty()) {
-                locationComponent?.forceLocationUpdate(keyPoints, true)
+                navigationMapboxMap?.updateLocation(keyPoints)
             } else {
-                locationComponent?.forceLocationUpdate(enhancedLocation)
+                navigationMapboxMap?.updateLocation(enhancedLocation)
             }
         }
     }
