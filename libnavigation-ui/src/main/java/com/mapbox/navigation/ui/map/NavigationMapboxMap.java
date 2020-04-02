@@ -15,6 +15,7 @@ import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
 import com.mapbox.mapboxsdk.location.LocationComponentOptions;
 import com.mapbox.mapboxsdk.location.OnCameraTrackingChangedListener;
+import com.mapbox.mapboxsdk.location.modes.CameraMode;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -117,16 +118,23 @@ public class NavigationMapboxMap {
                              @Nullable String routeBelowLayerId) {
     this.mapView = mapView;
     this.mapboxMap = mapboxMap;
-    initializeLocationComponent(mapView, mapboxMap);
     initializeMapPaddingAdjustor(mapView, mapboxMap);
     initializeNavigationSymbolManager(mapView, mapboxMap);
     initializeMapLayerInteractor(mapboxMap);
     initializeRoute(mapView, mapboxMap, routeBelowLayerId);
-    initializeCamera(mapboxMap, locationComponent);
-    initializeLocationFpsDelegate(mapboxMap, locationComponent);
     initializeArrivalExperience(mapboxMap, mapView);
+    initializeCamera(mapboxMap);
   }
 
+  public void initializeLocationComponent() {
+    setupLocationComponent(mapView, mapboxMap);
+    initializeLocationFpsDelegate(mapboxMap, locationComponent);
+  }
+
+  public void enterNavigationMode() {
+    locationComponent.setCameraMode(CameraMode.TRACKING_GPS);
+    locationComponent.setRenderMode(RenderMode.GPS);
+  }
 
   // Package private (no modifier) for testing purposes
   NavigationMapboxMap(MapLayerInteractor layerInteractor) {
@@ -702,7 +710,7 @@ public class NavigationMapboxMap {
   }
 
   @SuppressLint("MissingPermission")
-  private void initializeLocationComponent(MapView mapView, MapboxMap map) {
+  private void setupLocationComponent(MapView mapView, MapboxMap map) {
     locationComponent = map.getLocationComponent();
     map.setMinZoomPreference(NAVIGATION_MINIMUM_MAP_ZOOM);
     map.setMaxZoomPreference(NAVIGATION_MAXIMUM_MAP_ZOOM);
@@ -712,10 +720,12 @@ public class NavigationMapboxMap {
     LocationComponentOptions options = LocationComponentOptions.createFromAttributes(context, locationLayerStyleRes);
     LocationComponentActivationOptions activationOptions = LocationComponentActivationOptions.builder(context, style)
             .locationComponentOptions(options)
-            .useDefaultLocationEngine(false)
+            .useDefaultLocationEngine(true)
             .build();
     locationComponent.activateLocationComponent(activationOptions);
     locationComponent.setLocationComponentEnabled(true);
+    locationComponent.setCameraMode(CameraMode.TRACKING);
+    locationComponent.setRenderMode(RenderMode.COMPASS);
   }
 
   private int findLayerStyleRes(Context context) {
@@ -754,8 +764,8 @@ public class NavigationMapboxMap {
     mapRoute = new NavigationMapRoute(null, mapView, map, routeStyleRes, routeBelowLayerId);
   }
 
-  private void initializeCamera(MapboxMap map, LocationComponent locationComponent) {
-    mapCamera = new NavigationCamera(map, locationComponent);
+  private void initializeCamera(MapboxMap map) {
+    mapCamera = new NavigationCamera(map);
   }
 
   private void initializeLocationFpsDelegate(MapboxMap map, LocationComponent locationComponent) {
