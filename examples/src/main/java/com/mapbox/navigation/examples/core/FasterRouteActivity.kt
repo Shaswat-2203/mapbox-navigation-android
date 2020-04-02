@@ -44,9 +44,12 @@ import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.camera.DynamicCamera
 import com.mapbox.navigation.ui.camera.NavigationCamera.NAVIGATION_TRACKING_MODE_GPS
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
+import kotlinx.android.synthetic.main.activity_trip_service.*
 import java.lang.ref.WeakReference
 import kotlinx.android.synthetic.main.bottom_sheet_faster_route.*
 import kotlinx.android.synthetic.main.content_faster_route_layout.*
+import kotlinx.android.synthetic.main.content_faster_route_layout.container
+import kotlinx.android.synthetic.main.content_faster_route_layout.mapView
 import timber.log.Timber
 
 /**
@@ -64,7 +67,6 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private var mapboxMap: MapboxMap? = null
     private var fasterRoute: DirectionsRoute? = null
-    private var locationComponent: LocationComponent? = null
 
     private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var navigationMapboxMap: NavigationMapboxMap
@@ -96,9 +98,9 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
             keyPoints: List<Location>
         ) {
             if (keyPoints.isNotEmpty()) {
-                locationComponent?.forceLocationUpdate(keyPoints, true)
+                navigationMapboxMap.updateLocation(keyPoints)
             } else {
-                locationComponent?.forceLocationUpdate(enhancedLocation)
+                navigationMapboxMap.updateLocation(enhancedLocation)
             }
         }
     }
@@ -215,19 +217,9 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(mapboxMap: MapboxMap) {
         this.mapboxMap = mapboxMap
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
-            locationComponent = mapboxMap.locationComponent.apply {
-                activateLocationComponent(
-                    LocationComponentActivationOptions.builder(this@FasterRouteActivity, style)
-                        .useDefaultLocationEngine(false)
-                        .build()
-                )
-                cameraMode = CameraMode.TRACKING
-                isLocationComponentEnabled = true
-            }
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap).also {
-                it.addProgressChangeListener(mapboxNavigation)
-                it.setCamera(DynamicCamera(mapboxMap))
-            }
+            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap)
+            mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
+            navigationMapboxMap.initializeLocationComponent()
         }
         mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
         mapboxMap.addOnMapLongClickListener { latLng ->
@@ -253,9 +245,9 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         bottomSheetBehavior.peekHeight = 0
         fasterRouteAcceptProgress.max = MAX_PROGRESS.toInt()
         startNavigation.setOnClickListener {
+            navigationMapboxMap.enterNavigationMode()
+            navigationMapboxMap.addProgressChangeListener(mapboxNavigation)
             if (mapboxNavigation.getRoutes().isNotEmpty()) {
-                navigationMapboxMap.updateLocationLayerRenderMode(RenderMode.GPS)
-                navigationMapboxMap.updateCameraTrackingMode(NAVIGATION_TRACKING_MODE_GPS)
                 navigationMapboxMap.startCamera(mapboxNavigation.getRoutes()[0])
             }
             mapboxNavigation.startTripSession()
@@ -304,7 +296,7 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
         override fun onSuccess(result: LocationEngineResult?) {
             result?.locations?.firstOrNull()?.let {
-                activityRef.get()?.locationComponent?.forceLocationUpdate(it)
+                activityRef.get()?.mapboxMap?.locationComponent?.forceLocationUpdate(it)
             }
         }
 
