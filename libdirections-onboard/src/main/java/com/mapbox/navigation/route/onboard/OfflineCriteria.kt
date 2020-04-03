@@ -1,9 +1,15 @@
 package com.mapbox.navigation.route.onboard
 
+
+/**
+ * Offline Criteria. Used in Direction API
+ */
 object OfflineCriteria {
 
     /**
      * BicycleType parameter in the Directions API.
+     *
+     * @property type
      */
     enum class BicycleType(val type: String) {
         /**
@@ -34,6 +40,8 @@ object OfflineCriteria {
 
     /**
      * WaypointType parameter in the Directions API.
+     *
+     * @property type
      */
     enum class WaypointType(val type: String) {
         /**
